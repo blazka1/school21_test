@@ -14,7 +14,7 @@ function App() {
     const dropdownRef = useRef(null);
 
     useEffect(() => {
-        if (query && !isCountrySelected) {
+        if (query.length > 0 && !isCountrySelected) {
             axios.get(`http://127.0.0.1:8000/api/countries?query=${query}`)
                 .then(response => {
                     setCountries(response.data);
@@ -93,7 +93,7 @@ function App() {
                                 setQuery(e.target.value);
                                 setIsCountrySelected(false);
                             }}
-                            onFocus={() => !isCountrySelected && setShowDropdown(true)}
+                            onFocus={() => !isCountrySelected && query.length > 0 && setShowDropdown(true)}
                         />
 
                         {showDropdown && (
