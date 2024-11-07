@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Form, Button, Table } from 'react-bootstrap';
 
@@ -9,9 +9,12 @@ function App() {
     const [selectedCountry, setSelectedCountry] = useState('');
     const [entries, setEntries] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [isCountrySelected, setIsCountrySelected] = useState(false);
+
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
-        if (query) {
+        if (query && !isCountrySelected) {
             axios.get(`http://127.0.0.1:8000/api/countries?query=${query}`)
                 .then(response => {
                     setCountries(response.data);
@@ -23,12 +26,13 @@ function App() {
         } else {
             setShowDropdown(false);
         }
-    }, [query]);
+    }, [query, isCountrySelected]);
 
     const handleCountrySelect = (country) => {
         setSelectedCountry(country);
         setQuery(country);
         setShowDropdown(false);
+        setIsCountrySelected(true);
     };
 
     const handleSubmit = (e) => {
@@ -64,7 +68,6 @@ function App() {
         <div className="container mt-5">
             <h1>Добавить Email и Страну</h1>
 
-
             <Form onSubmit={handleSubmit}>
                 <div className="col-lg-3">
                     <Form.Group controlId="formEmail">
@@ -79,38 +82,39 @@ function App() {
                     </Form.Group>
                 </div>
 
-                <div className="col-lg-3">
+                <div className="col-lg-3" ref={dropdownRef}>
                     <Form.Group controlId="formCountry">
+                        <Form.Label>Страна</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="Начните вводить страну"
+                            value={query}
+                            onChange={(e) => {
+                                setQuery(e.target.value);
+                                setIsCountrySelected(false);
+                            }}
+                            onFocus={() => !isCountrySelected && setShowDropdown(true)}
+                        />
 
-                            <Form.Label>Страна</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Начните вводить страну"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onFocus={() => setShowDropdown(!!countries.length)}
-                            />
-
-                            {showDropdown && (
-                                <div className="dropdown-menu show">
-                                    {countries.map((country, index) => (
-                                        <div
-                                            key={index}
-                                            className="dropdown-item"
-                                            onClick={() => handleCountrySelect(country.value)}
-                                        >
-                                            {country.value}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                        {showDropdown && (
+                            <div className="dropdown-menu show">
+                                {countries.map((country, index) => (
+                                    <div
+                                        key={index}
+                                        className="dropdown-item"
+                                        onMouseDown={() => handleCountrySelect(country.value)}
+                                    >
+                                        {country.value}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </Form.Group>
                 </div>
 
                 <Button className="mt-2" variant="primary" type="submit">
                     Добавить
                 </Button>
-
             </Form>
 
             <h2 className="mt-5">Список Записей</h2>
