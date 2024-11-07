@@ -1,0 +1,5 @@
+.idea
+.htaccess
+backend/vendor
+.osp
+frontend/node_modules
